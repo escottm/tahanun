@@ -1,0 +1,20 @@
+# .gitignore
+# Ignore things
+*.[ao]
+*.log
+,*
+server/
+dist/
+*.bak
+ignore/
+.vscode
+node_modules/
+.env
+keybindings.json
+/ochospitals
+/reverse
+newproj.bash
+express-4.x-local-example/
+.DS_Store
+**/.eslintcache
+
