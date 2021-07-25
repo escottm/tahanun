@@ -7,7 +7,7 @@ import express from 'express';
 const PORT = process.env.PORT || 8080;
 const app = express();
 
-import { holidayName, isHoliday, readTahanun } from './calHoliday.js';
+import { readTahanun } from './readTahanun.js';
 
 
 app.get('/', (req, res) => {
