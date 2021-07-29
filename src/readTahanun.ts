@@ -57,11 +57,11 @@ function inExclRange( hebdate:HEBCAL_ITEM ):HEBCAL_ITEM {
     }
 
     if ( hebdate.hm == 'Nisan') 
-        return ({...hebdate, tahanun: false, title: 'Nisan'});   //  No tahanun for the entire month of ניסן
+        return ({...hebdate, tahanun: false, title: '(Omitted during Nisan'});   //  No tahanun for the entire month of ניסן
     if ( ( hebdate.hm == "Tishrei") && ( parseInt(hebdate.hd) >= 9 ) )
-        return ( {...hebdate, tahanun: false, title: 'Tishrei 9 to end of the month'});   //  No tahanun from erev Yom Kippur until Cheshvan
+        return ( {...hebdate, tahanun: false, title: '(Omitted Erev Y"K to R"Ch Cheshvan)'});   //  No tahanun from erev Yom Kippur until Cheshvan
     if ( ( hebdate.hm == 'Sivan') && (parseInt(hebdate.hd) < 12) ) 
-        return ( {...hebdate, tahanun: false, title: 'Sivan 1-12'});
+        return ( {...hebdate, tahanun: false, title: '(Omitted Sivan 1-12)'});
         
         return ( {...hebdate, tahanun:true} );
         
