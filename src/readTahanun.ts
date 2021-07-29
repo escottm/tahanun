@@ -71,8 +71,11 @@ function inExclRange( hebdate:HEBCAL_ITEM ):HEBCAL_ITEM {
 function secularHoliday( hebdate: HEBCAL_ITEM ):HEBCAL_ITEM {
     const secDate = parseInt( hebdate.gd ?? '0');   //  if .gd and/or .gm are not set, hell, we don't know what day it is...
     const secMonth = parseInt( hebdate.gm ?? '0');  //  ...that's probably an error but not worth worrying about
-    
-    if ( secMonth == 11 && (secDate >=22 && secDate <=28))
+    const secDay = hebdate.date 
+                ? (new Date( hebdate.date )).getUTCDay() 
+                : -1;
+
+    if ( secMonth == 11 && secDay == 4 && (secDate >=22 && secDate <=28))
     return ( {...hebdate, tahanun: false, title: 'Thanksgiving'} );
     if ( secMonth == 7 && secDate == 4 )
     return ( {...hebdate, tahanun: false, title: 'Fourth of July'});
