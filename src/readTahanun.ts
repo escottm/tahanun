@@ -75,13 +75,18 @@ export async function readTahanun( onDate = new Date() ):Promise<HEBCAL_ITEM> {
     const today = dateString( onDate );
     const tomorrow = dateString( dayAfter( onDate ) );
     console.log( `readTahanun: date parameter is ${today}, following day is ${tomorrow}`);
-
-//  Is it a holiday?
+    
     const hd = await getHebDate( onDate );
     if ( ! hd ) {
         console.error(`readTahanun: call to getHebDate(${today}) failed. Giving up.`);
         return ({...EMPTY_ITEM, date:today});
     }
+    
+    //  is it Shabbat? (oddly, not a "holiday event" on Hebcal)
+    if ( onDate.getUTCDay() == 6 )
+    return( {...hd, title: 'Shabbat', holiday: true, tahanun: false, services:['shaharit', 'minha'] })
+    
+    //  Is it a holiday?
     const hd_hol = getHoliday( hd );
     if ( hd_hol.holiday ) {
         console.log( `readTahanun: ${today} is holiday "${hd_hol.title}"`);
@@ -110,8 +115,9 @@ export async function readTahanun( onDate = new Date() ):Promise<HEBCAL_ITEM> {
     if ( ! rangeInfo.tahanun )  //  we're in the exclusion range
         return( {...rangeInfo, services:['shaharit', 'minha']} );
 
-    //  last thing: is it Erev Shabbat? Because it ain't anything else.
-    if ( onDate.getDay() == 6 )     //  erev Shabbat (and not anything else)
+    
+    //  is it Erev Shabbat? Because it ain't anything else.
+    if ( onDate.getUTCDay() == 5 )     //  erev Shabbat (and not anything else)
         return( {...hd, title: 'Erev Shabbat', tahanun: false, services:['minha']});
 
     return( {...hd, tahanun: true, services:['shaharit', 'minha']});   //  recite tahanun today
