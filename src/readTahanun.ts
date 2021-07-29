@@ -59,18 +59,28 @@ function inExclRange( hebdate:HEBCAL_ITEM ):HEBCAL_ITEM {
     if ( hebdate.hm == 'Nisan') 
         return ({...hebdate, tahanun: false, title: 'Nisan'});   //  No tahanun for the entire month of ניסן
     if ( ( hebdate.hm == "Tishrei") && ( parseInt(hebdate.hd) >= 9 ) )
-        return ( {...hebdate, tahanun: false, title: 'Yom Kippur Through End of Tishrei'});   //  No tahanun from erev Yom Kippur until Cheshvan
+        return ( {...hebdate, tahanun: false, title: 'Tishrei 9 to end of the month'});   //  No tahanun from erev Yom Kippur until Cheshvan
     if ( ( hebdate.hm == 'Sivan') && (parseInt(hebdate.hd) < 12) ) 
         return ( {...hebdate, tahanun: false, title: 'Sivan 1-12'});
+        
+        return ( {...hebdate, tahanun:true} );
+        
+}
+    
+//  We also exclude tachanun on significant secular holidays
+function secularHoliday( hebdate: HEBCAL_ITEM ):HEBCAL_ITEM {
+    const secDate = parseInt( hebdate.gd ?? '0');   //  if .gd and/or .gm are not set, hell, we don't know what day it is...
+    const secMonth = parseInt( hebdate.gm ?? '0');  //  ...that's probably an error but not worth worrying about
+    
+    if ( secMonth == 11 && (secDate >=22 && secDate <=28))
+    return ( {...hebdate, tahanun: false, title: 'Thanksgiving'} );
+    if ( secMonth == 7 && secDate == 4 )
+    return ( {...hebdate, tahanun: false, title: 'Fourth of July'});
 
     return ( {...hebdate, tahanun:true} );
-
 }
 
 //  Final word on reading tahanun
-//  Note: I'm re-reversing the Hebrew string. We reversed it earlier to make console messages read correctly
-//  But the json we return should be in the original (unlike the terminal, the browser knows to display r-to-l)
-//  This is dumb and I should do something more elegant
 export async function readTahanun( onDate = new Date() ):Promise<HEBCAL_ITEM> {
     const today = dateString( onDate );
     const tomorrow = dateString( dayAfter( onDate ) );
@@ -90,7 +100,7 @@ export async function readTahanun( onDate = new Date() ):Promise<HEBCAL_ITEM> {
     const hd_hol = getHoliday( hd );
     if ( hd_hol.holiday ) {
         console.log( `readTahanun: ${today} is holiday "${hd_hol.title}"`);
-        return ( {...hd_hol, tahanun:false, services:['shaharit','minha'] } )
+        return ( {...hd_hol, holiday: true, tahanun:false, services:['shaharit','minha'] } )
     }
 
 //  Is it erev holiday?
@@ -112,15 +122,18 @@ export async function readTahanun( onDate = new Date() ):Promise<HEBCAL_ITEM> {
     console.log( `readTahanun: ${today} is chol; checking ranges`);
     
     const rangeInfo = inExclRange(hd);    // check against date ranges where tahanun is omitted
-    if ( ! rangeInfo.tahanun )  //  we're in the exclusion range
+    const secularInfo = secularHoliday(hd); //  check for secular holidays
+    if ( ! rangeInfo.tahanun ) 
         return( {...rangeInfo, services:['shaharit', 'minha']} );
+    if ( ! secularInfo.tahanun )
+        return( {...secularInfo, holiday: true, services:['shaharit', 'minha']} );
 
     
     //  is it Erev Shabbat? Because it ain't anything else.
     if ( onDate.getUTCDay() == 5 )     //  erev Shabbat (and not anything else)
-        return( {...hd, title: 'Erev Shabbat', tahanun: false, services:['minha']});
+        return( {...hd, title: 'Erev Shabbat', holiday: true, tahanun: false, services:['minha']});
 
-    return( {...hd, tahanun: true, services:['shaharit', 'minha']});   //  recite tahanun today
+    return( {...hd, tahanun: true, holiday: false, services:['shaharit', 'minha']});   //  recite tahanun today
 }
 
 
